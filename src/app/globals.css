@@ -5,17 +5,92 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-0: #95d9a2;
+  --color-7: #e1e8e3;
+  --color-1: #ccddcf;
+  --color-2: #9ba8ab;
+  --color-3: #4a5c6a;
+  --color-4: #253745;
+  --color-5: #11212d;
+  --color-6: #06141b;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.bg-color-0 { background-color: var(--color-0); }
+.bg-color-1 { background-color: var(--color-1); }
+.bg-color-2 { background-color: var(--color-2); }
+.bg-color-3 { background-color: var(--color-3); }
+.bg-color-4 { background-color: var(--color-4); }
+.bg-color-5 { background-color: var(--color-5); }
+.bg-color-6 { background-color: var(--color-6); }
+.bg-color-7 { background-color: var(--color-7); }
+.text-color-0 { color: var(--color-0); }
+.text-color-1 { color: var(--color-1); }
+.text-color-2 { color: var(--color-2); }
+.text-color-3 { color: var(--color-3); }
+.text-color-4 { color: var(--color-4); }
+.text-color-5 { color: var(--color-5); }
+.text-color-6 { color: var(--color-6); }
+.text-color-7 { color: var(--color-7); }
+.border-color-0 { border-color: var(--color-0); }
+.border-color-1 { border-color: var(--color-1); }
+.border-color-2 { border-color: var(--color-2); }
+.border-color-3 { border-color: var(--color-3); }
+.border-color-4 { border-color: var(--color-4); }
+.border-color-5 { border-color: var(--color-5); }
+.border-color-6 { border-color: var(--color-6); }
+.border-color-7 { border-color: var(--color-7); }
+
+.prose-invert {
+  --tw-prose-body: var(--color-1);
+  --tw-prose-headings: var(--color-0);
+  --tw-prose-lead: var(--color-2);
+  --tw-prose-links: var(--color-0);
+  --tw-prose-bold: var(--color-0);
+  --tw-prose-counters: var(--color-2);
+  --tw-prose-bullets: var(--color-2);
+  --tw-prose-hr: var(--color-4);
+  --tw-prose-quotes: var(--color-2);
+  --tw-prose-quote-borders: var(--color-0);
+  --tw-prose-captions: var(--color-2);
+  --tw-prose-code: var(--color-0);
+  --tw-prose-pre-code: var(--color-0);
+  --tw-prose-pre-bg: var(--color-4);
+  --tw-prose-th-borders: var(--color-2);
+  --tw-prose-td-borders: var(--color-4);
+}
+
+@layer utilities {
+  .animate-fade-in {
+    opacity: 0;
+    animation: fadeIn 0.7s ease-in-out forwards;
+  }
+  .animate-slide-down { animation: slideDown 0.7s cubic-bezier(.4,0,.2,1) both; }
+  .animate-slide-left { animation: slideLeft 0.5s cubic-bezier(.4,0,.2,1) both; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideLeft {
+    from { opacity: 0; transform: translateX(100px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #9ba8ab44;
+  border-radius: 8px;
 }
