@@ -1,7 +1,8 @@
 from fastapi import FastAPI, File, UploadFile, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import fitz  # PyMuPDF
+from PyPDF2 import PdfReader
+
 import os
 import uuid
 from sentence_transformers import SentenceTransformer
@@ -43,24 +44,14 @@ collection = chroma_client.get_or_create_collection("pdf_chunks")
 # === Utils ===
 
 def extract_text_from_pdf(file_path):
-    doc = fitz.open(file_path)
+    reader = PdfReader(file_path)
     full_text = ""
-    for page_num in range(len(doc)):
-        page = doc.load_page(page_num)
-        # Using "blocks" gives more structure; each block is often a paragraph.
-        # A block is (x0, y0, x1, y1, "lines in block", block_no, block_type)
-        # block_type 0 is text.
-        blocks = page.get_text("blocks")
-        page_text = []
-        for b in blocks:
-            if b[6] == 0: # Text block
-                # b[4] contains the text lines, separated by \n if fitz detected them as separate lines within the block
-                block_text = b[4]
-                page_text.append(block_text)
-        full_text += "\n".join(page_text) + "\n\n" # Add double newline to separate pages, blocks should handle paragraphs
+    for page in reader.pages:
+        full_text += page.extract_text() + "\n\n"  # Add double newline to separate pages
     return full_text
 
 def clean_text_content(text):
+    
     # Remove bracketed numbers/citations like [1], [2,3], [4, 5]
     text = re.sub(r'\[\d+(?:, *\d+)*\]', '', text)
     # Remove parenthetical citations like (Author, 2023) or (Author et al., 2023)
@@ -209,17 +200,17 @@ async def query_pdf(q: PageAwareQuestionRequest):
     greetings = {"hi", "hello", "hey", "yo", "sup", "what's up", "wassup"}
     how_are_you = {"how are you", "how u doing", "how you doing", "how's it going", "what's good"}
     greeting_responses = [
-        "👋 Yo! PDFs beware, I’m armed with context and caffeine.",
+        "�� Yo! PDFs beware, I'm armed with context and caffeine.",
         "Hey there, digital traveler. Ready to drop some PDFs on me?",
-        "What's poppin'? If it’s a PDF, I’m down to read it like a nerd on espresso.",
-        "Sup? Upload your knowledge dumps and I’ll do the thinking. 🧠",
-        "Hi! Toss me some PDFs and let’s pretend I'm smart together."
+        "What's poppin'? If it's a PDF, I'm down to read it like a nerd on espresso.",
+        "Sup? Upload your knowledge dumps and I'll do the thinking. 🧠",
+        "Hi! Toss me some PDFs and let's pretend I'm smart together."
     ]
     mood_responses = [
-        "I’m vibing at 1000 tokens per second, thanks for asking. 🫡",
-        "Emotion.exe not found — but I’m functioning perfectly. Let’s do this.",
-        "I’m just a bunch of code and chaos, but livin’ my best artificial life. 😎",
-        "I’m doing better than your GPA during finals, probably. Ask away.",
+        "I'm vibing at 1000 tokens per second, thanks for asking. 🫡",
+        "Emotion.exe not found — but I'm functioning perfectly. Let's do this.",
+        "I'm just a bunch of code and chaos, but livin' my best artificial life. 😎",
+        "I'm doing better than your GPA during finals, probably. Ask away.",
         "Feeling like a server on Black Friday: overwhelmed but powered up."
     ]
     # Only match if the whole message is a greeting or mood question
@@ -236,7 +227,7 @@ async def query_pdf(q: PageAwareQuestionRequest):
             "used_tokens": 0
         }
 
-    question_embedding = embedding_model.encode(q.question).tolist()
+    question_embedding = embedding_model.encode(question).tolist()
 
     # Retrieve top 5 chunks
     results = collection.query(
@@ -251,9 +242,9 @@ async def query_pdf(q: PageAwareQuestionRequest):
     if pdf_name and page_number:
         pdf_path = os.path.join(UPLOAD_DIR, pdf_name)
         if os.path.exists(pdf_path):
-            doc = fitz.open(pdf_path)
-            if 1 <= page_number <= len(doc):
-                page_text = doc[page_number-1].get_text()
+            reader = PdfReader(pdf_path)
+            if 1 <= page_number <= len(reader.pages):
+                page_text = reader.pages[page_number-1].extract_text()
                 cleaned_page_text = clean_text_content(page_text)
                 page_chunks = chunk_text(cleaned_page_text)
 
@@ -267,10 +258,9 @@ async def query_pdf(q: PageAwareQuestionRequest):
         context = "\n\n".join(page_chunks)
     else:
         context = ""
-    print(f"Page-aware context length: {context} \ncharacters, estimated tokens: {estimate_tokens(context)}")
-    # Then add top chunks from Chroma
+    print(f"Page-aware context length: {context} \ncharacters, estimated tokens: {estimate_tokens(context)}")    # Then add top chunks from Chroma
     for chunk, meta in zip(top_chunks, top_metadatas):
-        context += f"{chunk}\\n---\\n"  # Removed PDF ID reference
+        context += f"{chunk}\n---\n"  # Removed PDF ID reference
         # selected_chunks.append(chunk)
         # selected_metadatas.append(meta)
     
