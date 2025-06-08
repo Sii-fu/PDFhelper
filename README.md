@@ -195,3 +195,65 @@ Feel free to:
 - PyPDF2 for PDF processing
 - Next.js team for the frontend framework
 - Shadcn UI for beautiful components
+
+## Project Structure
+
+- `main.py` - FastAPI backend server
+- `/` - Next.js frontend application
+
+## Deployment on Render
+
+This project is configured for deployment on Render with two services:
+
+### Backend Service (FastAPI)
+
+1. Create a new Web Service on Render
+2. Connect your GitHub repository
+3. Use the following settings:
+   - Name: `pdfhelper-backend`
+   - Runtime: `Python 3.9`
+   - Build Command: `pip install -r requirements.txt`
+   - Start Command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+   - Instance Type: Choose based on your needs (starter is fine for testing)
+
+### Frontend Service (Next.js)
+
+1. Create another Web Service on Render
+2. Connect the same GitHub repository
+3. Use the following settings:
+   - Name: `pdfhelper-frontend`
+   - Runtime: `Node`
+   - Build Command: `npm install && npm run build`
+   - Start Command: `npm start`
+   - Instance Type: Choose based on your needs (starter is fine for testing)
+4. Add the following environment variable:
+   - `NEXT_PUBLIC_API_URL`: Set to your backend service URL (e.g., `https://pdfhelper-backend.onrender.com`)
+
+## Local Development
+
+1. Clone the repository
+2. Install backend dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Install frontend dependencies:
+   ```bash
+   npm install
+   ```
+4. Start the backend server:
+   ```bash
+   uvicorn main:app --reload
+   ```
+5. Start the frontend development server:
+   ```bash
+   npm run dev
+   ```
+
+## Environment Variables
+
+### Backend
+- `PORT`: Set by Render automatically
+- `UPLOAD_DIR`: Directory for uploaded PDFs (default: 'uploaded_pdfs')
+
+### Frontend
+- `NEXT_PUBLIC_API_URL`: URL of the backend API service

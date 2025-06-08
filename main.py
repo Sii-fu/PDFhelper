@@ -19,18 +19,19 @@ import string
 # === Setup ===
 app = FastAPI()
 
-
 API_URL = "http://localhost:1234/v1/completions"
 HEADERS = {"Content-Type": "application/json"}
 
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Change to frontend domain if needed
+    allow_origins=[
+        "https://pdfhelper-frontend.onrender.com",  # Production frontend URL
+        "http://localhost:3000",  # Local development URL
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["Content-Range", "Accept-Ranges", "Content-Length"]  # <-- Add this line
+    expose_headers=["Content-Range", "Accept-Ranges", "Content-Length"]
 )
 
 UPLOAD_DIR = "uploaded_pdfs"
